@@ -6,7 +6,7 @@ It abstracts the external API calls away from the business logic, providing
 a clean interface for the controller layer.
 
 Responsibilities:
-- Communicate with Ollama API (http://localhost:11434/api/generate)
+- Communicate with Ollama API
 - Handle API configuration (model selection)
 - Manage connection errors and API failures
 - Return parsed responses to the controller
@@ -14,15 +14,23 @@ Responsibilities:
 """
 
 import json
+import logging
 import requests
 
-# ==============================================================================
-# Configuration
-# ==============================================================================
+import config
 
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "tinyllama"
-MAX_HISTORY = 10
+logger = logging.getLogger(__name__)
+
+
+class OllamaAPIError(Exception):
+    """Custom exception for Ollama API errors."""
+    pass
+
+
+class OllamaConnectionError(Exception):
+    """Custom exception for Ollama connection errors."""
+    pass
+
 
 conversation_history = []
 
@@ -36,30 +44,55 @@ def generate_response(prompt: str) -> str:
         
     Returns:
         The complete assistant response as a string
+        
+    Raises:
+        OllamaConnectionError: If unable to connect to Ollama server
+        OllamaAPIError: If the API returns an error
     """
     global conversation_history
 
+    logger.info(f"Generating response for prompt: {prompt[:50]}...")
+    
     conversation_history.append(f"User: {prompt}")
     
-    context = "\n".join(conversation_history[-MAX_HISTORY:])
+    context = "\n".join(conversation_history[-config.MAX_HISTORY:])
     full_prompt = f"{context}\nAssistant:"
     
     payload = {
-        "model": MODEL_NAME,
+        "model": config.MODEL_NAME,
         "prompt": full_prompt,
         "stream": False
     }
 
-    response = requests.post(OLLAMA_API_URL, json=payload)
-    response.raise_for_status()
+    try:
+        response = requests.post(config.OLLAMA_API_URL, json=payload, timeout=120)
+        response.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Failed to connect to Ollama server: {e}")
+        raise OllamaConnectionError(f"Unable to connect to Ollama server at {config.OLLAMA_API_URL}") from e
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Request to Ollama timed out: {e}")
+        raise OllamaAPIError("Request timed out") from e
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"Ollama API returned HTTP error: {e}")
+        raise OllamaAPIError(f"API error: {e}") from e
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to Ollama failed: {e}")
+        raise OllamaAPIError(f"Request failed: {e}") from e
 
-    ollama_response = response.json()
-    assistant_reply = ollama_response.get("response", "No response from model")
+    try:
+        ollama_response = response.json()
+        assistant_reply = ollama_response.get("response", "No response from model")
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse Ollama response: {e}")
+        raise OllamaAPIError("Invalid response format from Ollama") from e
+    
+    logger.info(f"Response generated successfully ({len(assistant_reply)} chars)")
     
     conversation_history.append(f"Assistant: {assistant_reply}")
     
-    if len(conversation_history) > MAX_HISTORY:
-        conversation_history = conversation_history[-MAX_HISTORY:]
+    if len(conversation_history) > config.MAX_HISTORY:
+        conversation_history = conversation_history[-config.MAX_HISTORY:]
     
     return assistant_reply
 
@@ -72,87 +105,75 @@ def generate_streaming_response(prompt: str):
     providing a better user experience as users can see the response as it's
     being generated rather than waiting for the complete response.
     
-    How Streaming Works:
-    1. Set stream=True in the API request to enable chunked transfer encoding
-    2. Use requests with stream=True to handle the response incrementally
-    3. Parse each line of the response as it's received (Ollama uses newline-delimited JSON)
-    4. Extract the "response" field from each chunk and yield it to the caller
-    5. Accumulate the full response for conversation history
-    
     Args:
         prompt: The user's input message
         
     Yields:
         String chunks of the assistant's response as they are generated
         
-    Note:
-        - The final chunk will have "done": true in the JSON payload
-        - We accumulate the full response to maintain conversation history
-        - Each chunk may contain multiple tokens, not just single characters
+    Raises:
+        OllamaConnectionError: If unable to connect to Ollama server
+        OllamaAPIError: If the API returns an error
     """
     global conversation_history
 
-    # Add user message to conversation history
+    logger.info(f"Generating streaming response for prompt: {prompt[:50]}...")
+    
     conversation_history.append(f"User: {prompt}")
     
-    # Build context from recent conversation history (limited to MAX_HISTORY)
-    context = "\n".join(conversation_history[-MAX_HISTORY:])
+    context = "\n".join(conversation_history[-config.MAX_HISTORY:])
     full_prompt = f"{context}\nAssistant:"
     
-    # Configure the payload for streaming
-    # stream=True tells Ollama to use chunked transfer encoding
-    # This sends the response in small pieces as they're generated
     payload = {
-        "model": MODEL_NAME,
+        "model": config.MODEL_NAME,
         "prompt": full_prompt,
-        "stream": True  # Enable streaming mode
+        "stream": True
     }
 
-    # Make the API request with stream=True
-    # This keeps the connection open and allows reading response chunks incrementally
-    # Without stream=True, requests would wait for the entire response before returning
-    response = requests.post(OLLAMA_API_URL, json=payload, stream=True)
-    response.raise_for_status()
+    try:
+        response = requests.post(config.OLLAMA_API_URL, json=payload, stream=True, timeout=120)
+        response.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Failed to connect to Ollama server: {e}")
+        raise OllamaConnectionError(f"Unable to connect to Ollama server at {config.OLLAMA_API_URL}") from e
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Request to Ollama timed out: {e}")
+        raise OllamaAPIError("Request timed out") from e
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"Ollama API returned HTTP error: {e}")
+        raise OllamaAPIError(f"API error: {e}") from e
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to Ollama failed: {e}")
+        raise OllamaAPIError(f"Request failed: {e}") from e
     
-    # Initialize accumulator for the complete response
-    # We need this to maintain conversation history after streaming completes
     full_response = ""
     
-    # Process the streaming response line by line
-    # Ollama returns each chunk as a separate JSON object on its own line
-    # Format: {"response": "partial text", "done": false}\n{"response": "more text", "done": false}\n...
-    for line in response.iter_lines():
-        if line:
-            # Decode the line from bytes to string
-            line_text = line.decode('utf-8')
-            
-            # Parse the JSON chunk
-            # Each chunk contains a "response" field with incremental text
-            # and a "done" field indicating if generation is complete
-            chunk = json.loads(line_text)
-            
-            # Extract the response text from this chunk
-            chunk_text = chunk.get("response", "")
-            
-            # Yield the chunk to the caller for real-time streaming
-            # This allows the client to receive tokens as they're generated
-            if chunk_text:
-                full_response += chunk_text
-                yield chunk_text
-            
-            # Check if the stream is complete
-            # done=True signals the final chunk - we can stop reading
-            if chunk.get("done", False):
-                break
+    try:
+        for line in response.iter_lines():
+            if line:
+                line_text = line.decode('utf-8')
+                chunk = json.loads(line_text)
+                chunk_text = chunk.get("response", "")
+                
+                if chunk_text:
+                    full_response += chunk_text
+                    yield chunk_text
+                
+                if chunk.get("done", False):
+                    break
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse Ollama streaming response: {e}")
+        raise OllamaAPIError("Invalid response format from Ollama") from e
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error during streaming: {e}")
+        raise OllamaAPIError(f"Streaming error: {e}") from e
     
-    # Add the complete assistant response to conversation history
-    # This maintains context for future conversations
+    logger.info(f"Streaming response completed ({len(full_response)} chars)")
+    
     conversation_history.append(f"Assistant: {full_response}")
     
-    # Trim conversation history to prevent unbounded growth
-    # Keep only the most recent MAX_HISTORY messages
-    if len(conversation_history) > MAX_HISTORY:
-        conversation_history = conversation_history[-MAX_HISTORY:]
+    if len(conversation_history) > config.MAX_HISTORY:
+        conversation_history = conversation_history[-config.MAX_HISTORY:]
 
 
 def clear_conversation_history():
@@ -162,4 +183,5 @@ def clear_conversation_history():
     Useful when starting a new conversation or session.
     """
     global conversation_history
+    logger.info("Clearing conversation history")
     conversation_history = []

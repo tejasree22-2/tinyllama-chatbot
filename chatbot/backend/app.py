@@ -10,14 +10,18 @@ Application Structure (Clean Architecture):
     3. services/      - Business logic and external API integrations
 """
 
+import logging
 from flask import Flask
 from flask_cors import CORS
 from controllers.chat_controller import chat_bp
+import config
 
 
 # ==============================================================================
 # Application Factory
 # ==============================================================================
+
+logger = logging.getLogger(__name__)
 
 def create_app():
     """
@@ -28,15 +32,15 @@ def create_app():
     Returns:
         Configured Flask application instance.
     """
+    logger.info("Starting Flask application")
+    
     app = Flask(__name__)
     
-    # Enable CORS (Cross-Origin Resource Sharing) to allow frontend to communicate with backend
-    # This allows requests from different origins (domains, ports, or protocols)
     CORS(app)
     
-    # Register blueprints (controllers)
-    # Each blueprint handles a specific set of routes
     app.register_blueprint(chat_bp)
+    
+    logger.info("Flask application initialized successfully")
     
     return app
 
@@ -54,6 +58,8 @@ app = create_app()
 # ==============================================================================
 
 if __name__ == '__main__':
-    # Run the Flask development server
-    # debug=True enables auto-reload and detailed error messages
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(
+        host=config.FLASK_HOST,
+        port=config.FLASK_PORT,
+        debug=config.FLASK_DEBUG
+    )
