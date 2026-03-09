@@ -1,0 +1,16 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Refactor the backend into a clean architecture.
+
+Requirements:
+- Create controller folder
+- Create service folder
+- Move chat endpoint to controller
+- Move Ollama integration into service
+- Keep Flask app initialization in app.py
+- Add clear comments explaining each layer
+

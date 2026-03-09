@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.9",
+  "checkpoint_id": "057ba003d89f",
+  "session_id": "ses_32eb87cceffe7hVJtWaBSJnuJ9",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-09T06:30:22.091583321Z",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "chatbot/backend/app.py",
+    "chatbot/backend/controllers/chat_controller.py",
+    "chatbot/backend/services/ollama_service.py"
+  ],
+  "agent": "OpenCode",
+  "turn_id": "df18f97f1b3c",
+  "token_usage": {
+    "input_tokens": 2495,
+    "cache_creation_tokens": 16494,
+    "cache_read_tokens": 127409,
+    "output_tokens": 2174,
+    "api_call_count": 11
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-09T06:30:22.010252817Z",
+    "agent_lines": 167,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 167,
+    "agent_percentage": 100
+  }
+}
