@@ -20,29 +20,22 @@ import requests
 
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
 MODEL_NAME = "tinyllama"
+MAX_HISTORY = 10
 
+conversation_history = []
 
-# ==============================================================================
-# Service Functions
-# ==============================================================================
 
 def generate_response(prompt: str) -> str:
-    """
-    Send a prompt to the Ollama API and get the generated response.
+    global conversation_history
 
-    Args:
-        prompt: The user message/prompt to send to the LLM.
-
-    Returns:
-        The generated text response from the model.
-
-    Raises:
-        ConnectionError: If unable to connect to Ollama server.
-        RequestException: If the API request fails.
-    """
+    conversation_history.append(f"User: {prompt}")
+    
+    context = "\n".join(conversation_history[-MAX_HISTORY:])
+    full_prompt = f"{context}\nAssistant:"
+    
     payload = {
         "model": MODEL_NAME,
-        "prompt": prompt,
+        "prompt": full_prompt,
         "stream": False
     }
 
@@ -50,4 +43,11 @@ def generate_response(prompt: str) -> str:
     response.raise_for_status()
 
     ollama_response = response.json()
-    return ollama_response.get("response", "No response from model")
+    assistant_reply = ollama_response.get("response", "No response from model")
+    
+    conversation_history.append(f"Assistant: {assistant_reply}")
+    
+    if len(conversation_history) > MAX_HISTORY:
+        conversation_history = conversation_history[-MAX_HISTORY:]
+    
+    return assistant_reply
