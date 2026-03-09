@@ -1,0 +1,15 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Enable streaming responses in the chatbot backend.
+
+Requirements:
+- Use Ollama streaming API
+- Update service layer to process streamed response
+- Return streamed output to client
+- Maintain conversation history
+- Add comments explaining streaming logic
+

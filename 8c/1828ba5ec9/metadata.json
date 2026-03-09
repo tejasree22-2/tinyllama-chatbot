@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.9",
+  "checkpoint_id": "8c1828ba5ec9",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "chatbot/backend/controllers/chat_controller.py",
+    "chatbot/backend/services/ollama_service.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/8c/1828ba5ec9/0/metadata.json",
+      "transcript": "/8c/1828ba5ec9/0/full.jsonl",
+      "context": "/8c/1828ba5ec9/0/context.md",
+      "content_hash": "/8c/1828ba5ec9/0/content_hash.txt",
+      "prompt": "/8c/1828ba5ec9/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 3553,
+    "cache_creation_tokens": 9963,
+    "cache_read_tokens": 184978,
+    "output_tokens": 3937,
+    "api_call_count": 13
+  }
+}
