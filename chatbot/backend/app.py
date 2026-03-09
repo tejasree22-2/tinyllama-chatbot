@@ -14,6 +14,7 @@ import logging
 from flask import Flask
 from flask_cors import CORS
 from controllers.chat_controller import chat_bp
+from controllers.rag_controller import rag_bp
 import config
 
 
@@ -39,6 +40,7 @@ def create_app():
     CORS(app)
     
     app.register_blueprint(chat_bp)
+    app.register_blueprint(rag_bp)
     
     logger.info("Flask application initialized successfully")
     
