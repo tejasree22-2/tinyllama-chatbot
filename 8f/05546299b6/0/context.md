@@ -1,0 +1,16 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Create a basic Flask backend server.
+
+Requirements:
+- Flask app in backend/app.py
+- Enable CORS
+- Create POST endpoint /chat
+- Accept JSON input {message}
+- Return temporary response JSON {reply}
+- Add comments explaining the code
+
