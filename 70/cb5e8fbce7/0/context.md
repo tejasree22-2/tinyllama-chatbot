@@ -1,0 +1,15 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Improve the backend for production readiness.
+
+Requirements:
+- Add logging using Python logging module
+- Add environment configuration file (.env)
+- Add error handling for Ollama API failures
+- Allow model name configuration
+- Keep architecture controller → service
+
