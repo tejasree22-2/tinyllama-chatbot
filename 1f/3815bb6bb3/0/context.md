@@ -1,0 +1,16 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Add RAG support to the chatbot.
+
+Requirements:
+- Allow document loading
+- Convert text to embeddings
+- Store embeddings in vector database
+- Retrieve relevant context
+- Send context + question to TinyLlama
+- Keep Flask backend architecture
+

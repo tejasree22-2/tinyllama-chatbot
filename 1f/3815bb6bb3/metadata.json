@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.9",
+  "checkpoint_id": "1f3815bb6bb3",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "chatbot/backend/app.py",
+    "chatbot/backend/config.py",
+    "chatbot/backend/controllers/chat_controller.py",
+    "chatbot/backend/controllers/rag_controller.py",
+    "chatbot/backend/services/embedding_service.py",
+    "chatbot/backend/services/ollama_service.py",
+    "chatbot/backend/services/rag_service.py",
+    "chatbot/requirements.txt"
+  ],
+  "sessions": [
+    {
+      "metadata": "/1f/3815bb6bb3/0/metadata.json",
+      "transcript": "/1f/3815bb6bb3/0/full.jsonl",
+      "context": "/1f/3815bb6bb3/0/context.md",
+      "content_hash": "/1f/3815bb6bb3/0/content_hash.txt",
+      "prompt": "/1f/3815bb6bb3/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 9686,
+    "cache_creation_tokens": 39437,
+    "cache_read_tokens": 506461,
+    "output_tokens": 10918,
+    "api_call_count": 26
+  }
+}
