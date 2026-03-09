@@ -1,0 +1,18 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Update the Flask backend to integrate Ollama TinyLlama.
+
+Requirements:
+- Use requests library
+- Send POST request to http://localhost:11434/api/generate
+- Model: tinyllama
+- Send user message as prompt
+- Disable streaming
+- Extract response text
+- Return response JSON {reply}
+- Add comments explaining the flow
+

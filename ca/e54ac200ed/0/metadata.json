@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.9",
+  "checkpoint_id": "cae54ac200ed",
+  "session_id": "ses_32ec23684ffePR9K1iIM7oS05K",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-09T06:19:32.336945359Z",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "chatbot/backend/app.py"
+  ],
+  "agent": "OpenCode",
+  "turn_id": "7a28624ef515",
+  "token_usage": {
+    "input_tokens": 873,
+    "cache_creation_tokens": 12690,
+    "cache_read_tokens": 34605,
+    "output_tokens": 1340,
+    "api_call_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-09T06:19:32.236011913Z",
+    "agent_lines": 38,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 38,
+    "agent_percentage": 100
+  }
+}

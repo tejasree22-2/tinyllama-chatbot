@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.9",
+  "checkpoint_id": "cae54ac200ed",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "chatbot/backend/app.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ca/e54ac200ed/0/metadata.json",
+      "transcript": "/ca/e54ac200ed/0/full.jsonl",
+      "context": "/ca/e54ac200ed/0/context.md",
+      "content_hash": "/ca/e54ac200ed/0/content_hash.txt",
+      "prompt": "/ca/e54ac200ed/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 873,
+    "cache_creation_tokens": 12690,
+    "cache_read_tokens": 34605,
+    "output_tokens": 1340,
+    "api_call_count": 4
+  }
+}
