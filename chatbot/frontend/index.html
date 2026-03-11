@@ -140,61 +140,62 @@
         </div>
     </div>
 
-    <script>
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendButton = document.getElementById('sendButton');
-
-        async function sendMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            addMessage(message, 'user');
-            chatInput.value = '';
-            sendButton.disabled = true;
-
-            const typingIndicator = document.createElement('div');
-            typingIndicator.className = 'typing';
-            typingIndicator.textContent = 'Thinking...';
-            chatMessages.appendChild(typingIndicator);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const response = await fetch('http://localhost:5000/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
-                });
-
-                const data = await response.json();
-                typingIndicator.remove();
-                
-                if (data.error) {
-                    addMessage(data.error, 'error');
-                } else {
-                    addMessage(data.response, 'ai');
-                }
-            } catch (error) {
-                typingIndicator.remove();
-                addMessage('Failed to connect to server', 'error');
+   <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
+    
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+    
+        addMessage(message, 'user');
+        chatInput.value = '';
+        sendButton.disabled = true;
+    
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'typing';
+        typingIndicator.textContent = 'Thinking...';
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+        try {
+            const response = await fetch('http://localhost:5000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+    
+            const data = await response.json();
+            typingIndicator.remove();
+    
+            if (data.error) {
+                addMessage(data.error, 'error');
+            } else {
+                addMessage(data.reply, 'ai');   // ✅ FIXED LINE
             }
-
-            sendButton.disabled = false;
-            chatInput.focus();
+    
+        } catch (error) {
+            typingIndicator.remove();
+            addMessage('Failed to connect to server', 'error');
         }
-
-        function addMessage(text, type) {
-            const message = document.createElement('div');
-            message.className = `message ${type}`;
-            message.textContent = text;
-            chatMessages.appendChild(message);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        sendButton.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+    
+        sendButton.disabled = false;
+        chatInput.focus();
+    }
+    
+    function addMessage(text, type) {
+        const message = document.createElement('div');
+        message.className = `message ${type}`;
+        message.textContent = text;
+        chatMessages.appendChild(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    sendButton.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
     </script>
 </body>
 </html>
