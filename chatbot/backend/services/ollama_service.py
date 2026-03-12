@@ -39,25 +39,32 @@ conversation_history = []
 def generate_response(prompt: str) -> str:
     """
     Generate a non-streaming response from Ollama.
-    
-    Args:
-        prompt: The user's input message
-        
-    Returns:
-        The complete assistant response as a string
-        
-    Raises:
-        OllamaConnectionError: If unable to connect to Ollama server
-        OllamaAPIError: If the API returns an error
     """
     global conversation_history
 
     logger.info(f"Generating response for prompt: {prompt[:50]}...")
     
+    # 🔹 System instruction to force single assistant reply
+    system_instruction = (
+        "You are a helpful AI assistant. "
+        "Reply directly to the user's message. "
+        "Do NOT create fictional conversations. "
+        "Do NOT generate multiple speakers like 'User:' or 'Assistant:'. "
+        "Give only the assistant reply."
+    )
+
     conversation_history.append(f"User: {prompt}")
     
     context = "\n".join(conversation_history[-config.MAX_HISTORY:])
-    full_prompt = f"{context}\nAssistant:"
+    
+    full_prompt = f"""
+System: {system_instruction}
+
+Conversation:
+{context}
+
+Assistant:
+"""
     
     payload = {
         "model": config.MODEL_NAME,
@@ -83,11 +90,26 @@ def generate_response(prompt: str) -> str:
 
     try:
         ollama_response = response.json()
-        assistant_reply = ollama_response.get("response", "No response from model")
+        assistant_reply = ollama_response.get("response", "No response from model").strip()
     except json.JSONDecodeError as e:
         logger.error(f"Failed to parse Ollama response: {e}")
         raise OllamaAPIError("Invalid response format from Ollama") from e
-    
+
+    # 🔹 Clean unwanted multi-speaker responses
+    if "User:" in assistant_reply:
+        assistant_reply = assistant_reply.split("User:")[0]
+
+    if "Assistant:" in assistant_reply:
+        assistant_reply = assistant_reply.split("Assistant:")[-1]
+
+    if "Customer:" in assistant_reply:
+        assistant_reply = assistant_reply.replace("Customer:", "")
+
+    if "AI assistant:" in assistant_reply:
+        assistant_reply = assistant_reply.replace("AI assistant:", "")
+
+    assistant_reply = assistant_reply.strip()
+
     logger.info(f"Response generated successfully ({len(assistant_reply)} chars)")
     
     conversation_history.append(f"Assistant: {assistant_reply}")
@@ -96,7 +118,6 @@ def generate_response(prompt: str) -> str:
         conversation_history = conversation_history[-config.MAX_HISTORY:]
     
     return assistant_reply
-
 
 def generate_streaming_response(prompt: str):
     """
